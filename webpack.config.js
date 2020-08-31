@@ -1,5 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const rules = [
   {
@@ -8,6 +10,20 @@ const rules = [
     use: {
       loader: 'babel-loader',
     },
+  },
+  {
+    test: /\.s?css$/,
+    exclude: /node_modules/,
+    use: [
+      {
+        loader: MiniCssExtractPlugin.loader,
+        options: {
+          hmr: process.env.NODE_ENV === 'development',
+        },
+      },
+      'css-loader',
+      'sass-loader',
+    ],
   },
 ];
 
@@ -30,6 +46,15 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
+    }),
+    new MiniCssExtractPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, './public/static/'),
+          to: path.resolve(__dirname, './build/static/'),
+        },
+      ],
     }),
   ],
 };
