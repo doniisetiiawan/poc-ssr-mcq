@@ -1,5 +1,9 @@
 import React from 'react';
+import { Provider } from 'react-redux';
+import serialize from 'serialize-javascript';
 import App from './components/App';
+import createStore from './store';
+import { setAge } from './reducers/person';
 
 const fs = require('fs');
 const path = require('path');
@@ -12,9 +16,18 @@ const { renderToString } = reactDOMServer;
 const app = express();
 app.server = http.createServer(app);
 
-app.use('/static', express.static(path.resolve('build/static')));
-app.use('/main.css', express.static(path.resolve('build/main.css')));
-app.use('/bundle.js', express.static(path.resolve('build/bundle.js')));
+app.use(
+  '/static',
+  express.static(path.resolve('build/static')),
+);
+app.use(
+  '/main.css',
+  express.static(path.resolve('build/main.css')),
+);
+app.use(
+  '/bundle.js',
+  express.static(path.resolve('build/bundle.js')),
+);
 
 app.get('*', (req, res) => {
   const filePath = path.resolve('build', 'index.html');
@@ -24,8 +37,20 @@ app.get('*', (req, res) => {
       res.status(404).send('Error: 404');
     }
 
-    const reactHtml = renderToString(<App />);
-    const html = data.replace('{{HTML}}', reactHtml);
+    const store = createStore();
+    store.dispatch(setAge(75));
+
+    const reactHtml = renderToString(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+    );
+    const html = data
+      .replace('{{HTML}}', reactHtml)
+      .replace(
+        '{{INITIAL_STATE}}',
+        serialize(store.getState(), { isJson: true }),
+      );
     res.status(200).send(html);
   });
 });
