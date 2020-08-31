@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import serialize from 'serialize-javascript';
 import App from './components/App';
 import createStore from './store';
-import { setAge } from './reducers/person';
+import { fetchFriends, setAge } from './reducers/person';
 
 const fs = require('fs');
 const path = require('path');
@@ -29,6 +29,18 @@ app.use(
   express.static(path.resolve('build/bundle.js')),
 );
 
+app.get('/api/friends', (req, res) => {
+  res.json({
+    friends: [
+      'James',
+      'Eric',
+      'Olivia',
+      'Emma',
+      'Charlotte',
+    ],
+  });
+});
+
 app.get('*', (req, res) => {
   const filePath = path.resolve('build', 'index.html');
   fs.readFile(filePath, 'utf-8', (err, data) => {
@@ -38,20 +50,27 @@ app.get('*', (req, res) => {
     }
 
     const store = createStore();
-    store.dispatch(setAge(75));
+    const promises = [
+      store.dispatch(setAge(75)),
+      store.dispatch(fetchFriends()),
+    ];
 
-    const reactHtml = renderToString(
-      <Provider store={store}>
-        <App />
-      </Provider>,
-    );
-    const html = data
-      .replace('{{HTML}}', reactHtml)
-      .replace(
-        '{{INITIAL_STATE}}',
-        serialize(store.getState(), { isJson: true }),
+    Promise.all(promises).then(() => {
+      const reactHtml = renderToString(
+        <Provider store={store}>
+          <App />
+        </Provider>,
       );
-    res.status(200).send(html);
+
+      const html = data
+        .replace('{{HTML}}', reactHtml)
+        .replace(
+          '{{INITIAL_STATE}}',
+          serialize(store.getState(), { isJson: true }),
+        );
+
+      res.status(200).send(html);
+    });
   });
 });
 

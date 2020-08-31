@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   ageIncrement,
   ageDecrement,
-  setAge,
+  setAge, fetchFriends,
 } from '../reducers/person';
 
 const App = ({
@@ -12,7 +12,16 @@ const App = ({
   ageIncrement,
   ageDecrement,
   setAge,
+  fetchFriends,
+  friends,
+  isLoading,
 }) => {
+  useEffect(() => {
+    if (!friends.length) {
+      fetchFriends();
+    }
+  }, [friends]);
+
   const env = __isClientSide__ ? 'client' : 'server';
 
   return (
@@ -22,9 +31,20 @@ const App = ({
       </p>
       <p>Your age is: {age}</p>
       <p>
-        <button type="button" onClick={ageDecrement}>younger</button>
-        <button type="button" onClick={ageIncrement}>older</button>
-        <button type="button" onClick={() => setAge(50)}>age = 50</button>
+        Is fetching:{' '}
+        {isLoading ? 'yes, please wait...' : 'no'}
+      </p>
+      <p>Friends: {friends.join(', ')}</p>
+      <p>
+        <button type="button" onClick={ageDecrement}>
+          younger
+        </button>
+        <button type="button" onClick={ageIncrement}>
+          older
+        </button>
+        <button type="button" onClick={() => setAge(50)}>
+          age = 50
+        </button>
       </p>
       <img src="/static/kitten.jpg" alt="kitten" />
     </>
@@ -34,12 +54,15 @@ const App = ({
 const mapStateToProps = (state) => ({
   name: state.person.name,
   age: state.person.age,
+  friends: state.person.friends.data,
+  isLoading: state.person.friends.isLoading,
 });
 
 const mapDispatchToProps = {
   ageIncrement,
   ageDecrement,
   setAge,
+  fetchFriends,
 };
 
 export default connect(
