@@ -1,8 +1,12 @@
 import React from 'react';
 
-export default () => (
-  <>
-    <div>Hello world!</div>
-    <img src="/static/kitten.jpg" alt="kitten" />
-  </>
-);
+export default () => {
+  const env = __isClientSide__ ? 'from client' : 'from server';
+
+  return (
+    <>
+      <div>Hello {env}!</div>
+      <img src="/static/kitten.jpg" alt="kitten" />
+    </>
+  );
+};
