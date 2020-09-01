@@ -1,6 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import serialize from 'serialize-javascript';
+import { StaticRouter } from 'react-router-dom';
 import App from './components/App';
 import createStore from './store';
 import { fetchFriends, setAge } from './reducers/person';
@@ -58,7 +59,9 @@ app.get('*', (req, res) => {
     Promise.all(promises).then(() => {
       const reactHtml = renderToString(
         <Provider store={store}>
-          <App />
+          <StaticRouter location={req.url}>
+            <App />
+          </StaticRouter>
         </Provider>,
       );
 

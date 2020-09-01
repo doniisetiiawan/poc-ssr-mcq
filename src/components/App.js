@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
+import { renderRoutes } from 'react-router-config';
 import {
   ageIncrement,
   ageDecrement,
-  setAge, fetchFriends,
+  setAge,
+  fetchFriends,
 } from '../reducers/person';
+import routes from '../routes';
+import MenuLink from './MenuLink';
 
 const App = ({
   name,
@@ -22,6 +26,7 @@ const App = ({
     }
   }, [friends]);
 
+  // eslint-disable-next-line no-undef
   const env = __isClientSide__ ? 'client' : 'server';
 
   return (
@@ -46,7 +51,12 @@ const App = ({
           age = 50
         </button>
       </p>
-      <img src="/static/kitten.jpg" alt="kitten" />
+      <div>
+        {routes.map((route) => (
+          <MenuLink route={route} />
+        ))}
+      </div>
+      {renderRoutes(routes)}
     </>
   );
 };
